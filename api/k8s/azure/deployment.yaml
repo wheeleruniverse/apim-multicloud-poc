@@ -1,0 +1,156 @@
+# Kubernetes Deployment for Hello API on Azure AKS
+# This manifest deploys the Hello API to the Azure AKS cluster
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: hello-api
+  labels:
+    environment: dev
+    managed-by: kubectl
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hello-api-config
+  namespace: hello-api
+data:
+  CLOUD_PROVIDER: "Azure"
+  REGION: "eastus"
+  ENVIRONMENT: "dev"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello-api
+  namespace: hello-api
+  labels:
+    app: hello-api
+    cloud: azure
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: hello-api
+  template:
+    metadata:
+      labels:
+        app: hello-api
+        cloud: azure
+    spec:
+      containers:
+        - name: hello-api
+          # Update this with your ACR URL
+          image: ${ACR_NAME}.azurecr.io/hello-api:latest
+          ports:
+            - containerPort: 8080
+              name: http
+          env:
+            - name: CLOUD_PROVIDER
+              valueFrom:
+                configMapKeyRef:
+                  name: hello-api-config
+                  key: CLOUD_PROVIDER
+            - name: REGION
+              valueFrom:
+                configMapKeyRef:
+                  name: hello-api-config
+                  key: REGION
+            - name: ENVIRONMENT
+              valueFrom:
+                configMapKeyRef:
+                  name: hello-api-config
+                  key: ENVIRONMENT
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "256Mi"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 3
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hello-api
+  namespace: hello-api
+  labels:
+    app: hello-api
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: 8080
+      protocol: TCP
+      name: http
+  selector:
+    app: hello-api
+---
+# Optional: External LoadBalancer for direct access (bypassing APIM)
+apiVersion: v1
+kind: Service
+metadata:
+  name: hello-api-external
+  namespace: hello-api
+  labels:
+    app: hello-api
+  annotations:
+    service.beta.kubernetes.io/azure-load-balancer-internal: "false"
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 80
+      targetPort: 8080
+      protocol: TCP
+      name: http
+  selector:
+    app: hello-api
+---
+# HorizontalPodAutoscaler for production
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: hello-api-hpa
+  namespace: hello-api
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: hello-api
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80

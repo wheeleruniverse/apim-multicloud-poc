@@ -1,0 +1,59 @@
+# Development Environment Variables
+# Copy this file to terraform.tfvars and fill in your values
+
+# =============================================================================
+# GENERAL SETTINGS
+# =============================================================================
+
+environment       = "dev"
+api_namespace     = "hello-api"
+gateway_namespace = "apim-gateway"
+
+# =============================================================================
+# AZURE SETTINGS
+# =============================================================================
+
+azure_location = "eastus"
+
+# APIM Configuration
+apim_publisher_name  = "Your Organization Name"
+apim_publisher_email = "admin@yourorg.com"
+apim_sku             = "Developer_1"  # Use "Premium_1" for production
+
+# AKS Configuration
+aks_node_count         = 2
+aks_vm_size            = "Standard_DS2_v2"
+aks_enable_autoscaling = false
+aks_min_nodes          = 1
+aks_max_nodes          = 5
+
+# =============================================================================
+# AWS SETTINGS
+# =============================================================================
+
+aws_region = "us-east-1"
+
+# EKS Configuration
+eks_kubernetes_version = "1.28"
+eks_instance_type      = "t3.medium"
+eks_min_nodes          = 1
+eks_max_nodes          = 5
+eks_desired_nodes      = 2
+
+# Self-Hosted Gateway Configuration
+gateway_replicas = 2
+
+# =============================================================================
+# SENSITIVE VALUES
+# =============================================================================
+
+# Generate this token using Azure CLI after APIM is created:
+# az apim gateway token create \
+#   --gateway-id aws-self-hosted-gateway \
+#   --resource-group apim-multicloud-poc-dev-rg \
+#   --service-name apim-multicloud-poc-dev-apim \
+#   --expiry "2025-12-31T23:59:59Z"
+#
+# NOTE: For initial deployment, you can use a placeholder value like "placeholder"
+# Then after APIM is created, generate the real token and update this value.
+apim_gateway_token = "GatewayKey <YOUR_GENERATED_TOKEN>"
