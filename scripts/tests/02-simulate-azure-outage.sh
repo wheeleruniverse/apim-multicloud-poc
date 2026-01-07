@@ -5,8 +5,6 @@
 
 set -e
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-
 # Colors
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -148,7 +146,7 @@ EOF
 
 remove_network_policy() {
     log_step "Removing NetworkPolicy..."
-    $KUBECTL_CMD delete networkpolicy block-azure-apim -n ${GATEWAY_NAMESPACE} --ignore-not-found=true
+    $KUBECTL_CMD delete networkpolicy block-azure-apim -n "${GATEWAY_NAMESPACE}" --ignore-not-found=true
     log_success "NetworkPolicy removed"
 }
 
@@ -187,7 +185,7 @@ check_gateway_logs() {
     log_step "Checking gateway logs for config backup usage..."
     
     local logs
-    logs=$($KUBECTL_CMD logs -l app=apim-gateway -n ${GATEWAY_NAMESPACE} --tail=50 2>/dev/null) || {
+    logs=$($KUBECTL_CMD logs -l app=apim-gateway -n "${GATEWAY_NAMESPACE}" --tail=50 2>/dev/null) || {
         log_warn "Could not retrieve gateway logs"
         return
     }

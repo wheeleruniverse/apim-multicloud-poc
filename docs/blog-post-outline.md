@@ -181,7 +181,7 @@ curl http://gateway-url/aws-api/hello
 ## Repository Reference
 
 All code and scripts referenced in this blog post are available in the companion repository:
-- GitHub: [link to repo]
+- GitHub: https://github.com/wheeleruniverse/apim-multicloud-poc
 
 The repository includes:
 - Complete Terraform configurations

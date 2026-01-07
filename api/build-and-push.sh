@@ -103,7 +103,7 @@ fi
 # Build the Docker image
 log_info "Building Docker image..."
 cd "${PROJECT_ROOT}"
-docker build -t hello-api:${IMAGE_TAG} -f docker/Dockerfile .
+docker build -t hello-api:"${IMAGE_TAG}" -f docker/Dockerfile .
 
 # Push to Azure ACR
 if [[ "$AWS_ONLY" == "false" ]]; then
@@ -114,7 +114,7 @@ if [[ "$AWS_ONLY" == "false" ]]; then
     AZURE_IMAGE="${ACR_URL}/hello-api:${IMAGE_TAG}"
     
     log_info "Tagging image for Azure ACR..."
-    docker tag hello-api:${IMAGE_TAG} "${AZURE_IMAGE}"
+    docker tag hello-api:"${IMAGE_TAG}" "${AZURE_IMAGE}"
     
     log_info "Pushing image to Azure ACR..."
     docker push "${AZURE_IMAGE}"
@@ -131,7 +131,7 @@ if [[ "$AZURE_ONLY" == "false" ]]; then
     AWS_IMAGE="${ECR_REPO}:${IMAGE_TAG}"
     
     log_info "Tagging image for AWS ECR..."
-    docker tag hello-api:${IMAGE_TAG} "${AWS_IMAGE}"
+    docker tag hello-api:"${IMAGE_TAG}" "${AWS_IMAGE}"
     
     log_info "Pushing image to AWS ECR..."
     docker push "${AWS_IMAGE}"
