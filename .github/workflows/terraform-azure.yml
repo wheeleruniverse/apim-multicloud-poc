@@ -1,0 +1,246 @@
+name: Terraform - Azure Deployment
+
+on:
+  workflow_dispatch:
+    inputs:
+      operation:
+        description: 'Terraform operation to perform'
+        required: true
+        type: choice
+        options:
+          - plan
+          - apply
+          - destroy
+        default: 'plan'
+      environment:
+        description: 'Deployment environment'
+        required: true
+        type: choice
+        options:
+          - dev
+          # - staging
+          # - prod
+        default: 'dev'
+
+permissions:
+  id-token: write      # Required for OIDC authentication
+  contents: read       # Required to checkout code
+  pull-requests: write # Required for PR comments
+
+jobs:
+  terraform-azure:
+    name: 'Terraform Azure - ${{ inputs.operation }}'
+    runs-on: ubuntu-latest
+
+    # Use environment protection for destroy operations
+    environment: ${{ inputs.operation == 'destroy' && format('{0}-azure-destroy-approval', inputs.environment) || format('{0}-azure', inputs.environment) }}
+
+    defaults:
+      run:
+        working-directory: terraform/environments/${{ inputs.environment }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Azure Login via OIDC
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "~1.5"
+          terraform_wrapper: false
+
+      - name: Terraform Format Check
+        id: fmt
+        run: terraform fmt -check -recursive
+        continue-on-error: true
+
+      - name: Terraform Init
+        id: init
+        run: terraform init
+        env:
+          ARM_USE_OIDC: true
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Terraform Validate
+        id: validate
+        run: terraform validate
+
+      - name: Terraform Plan (Azure Resources)
+        id: plan
+        if: inputs.operation == 'plan' || inputs.operation == 'apply'
+        run: |
+          set -o pipefail
+          terraform plan \
+            -target=module.azure_apim \
+            -target=module.azure_aks \
+            -var="apim_gateway_token=dummy-token-for-plan" \
+            -out=tfplan-azure \
+            -no-color | tee plan-output.txt
+        env:
+          ARM_USE_OIDC: true
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          TF_VAR_apim_publisher_email: ${{ vars.APIM_PUBLISHER_EMAIL }}
+        continue-on-error: false
+
+      - name: Upload Plan Output
+        if: (inputs.operation == 'plan' || inputs.operation == 'apply') && steps.plan.outcome == 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: terraform-plan-azure-${{ inputs.environment }}
+          path: terraform/environments/${{ inputs.environment }}/plan-output.txt
+          retention-days: 30
+
+      - name: Comment Plan on PR
+        if: github.event_name == 'pull_request' && steps.plan.outcome == 'success'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const planOutput = fs.readFileSync('terraform/environments/${{ inputs.environment }}/plan-output.txt', 'utf8');
+            const truncatedOutput = planOutput.length > 65000 ? planOutput.substring(0, 65000) + '\n\n... (truncated)' : planOutput;
+
+            const output = `#### Terraform Plan - Azure (${{ inputs.environment }}) 📝
+
+            <details><summary>Show Plan</summary>
+
+            \`\`\`terraform
+            ${truncatedOutput}
+            \`\`\`
+
+            </details>
+
+            *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Workflow: \`${{ github.workflow }}\`*`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            });
+
+      - name: Terraform Apply (Azure Resources)
+        id: apply
+        if: inputs.operation == 'apply'
+        run: terraform apply -auto-approve tfplan-azure
+        env:
+          ARM_USE_OIDC: true
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Get Terraform Outputs
+        id: outputs
+        if: inputs.operation == 'apply' && steps.apply.outcome == 'success'
+        run: |
+          echo "Retrieving Terraform outputs..."
+
+          # Get gateway token command
+          GATEWAY_TOKEN_CMD=$(terraform output -raw gateway_token_command 2>/dev/null || echo "Not available yet")
+
+          # Get APIM gateway URL
+          APIM_GATEWAY_URL=$(terraform output -raw azure_apim_gateway_url 2>/dev/null || echo "Not available yet")
+
+          # Get AKS credentials command
+          AKS_CREDS_CMD=$(terraform output -raw azure_aks_get_credentials 2>/dev/null || echo "Not available yet")
+
+          # Save to environment file for next step
+          echo "GATEWAY_TOKEN_CMD<<EOF" >> $GITHUB_ENV
+          echo "$GATEWAY_TOKEN_CMD" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+          echo "APIM_GATEWAY_URL=$APIM_GATEWAY_URL" >> $GITHUB_ENV
+          echo "AKS_CREDS_CMD=$AKS_CREDS_CMD" >> $GITHUB_ENV
+        continue-on-error: true
+
+      - name: Display Next Steps
+        if: inputs.operation == 'apply' && steps.apply.outcome == 'success'
+        run: |
+          echo "============================================================"
+          echo "Azure Deployment Complete!"
+          echo "============================================================"
+          echo ""
+          echo "APIM Gateway URL: ${{ env.APIM_GATEWAY_URL }}"
+          echo ""
+          echo "============================================================"
+          echo "NEXT STEP: Generate APIM Gateway Token"
+          echo "============================================================"
+          echo ""
+          echo "Run this command to generate the gateway token:"
+          echo ""
+          echo "${{ env.GATEWAY_TOKEN_CMD }}"
+          echo ""
+          echo "Then add the token to GitHub Secrets:"
+          echo "  1. Go to: https://github.com/${{ github.repository }}/settings/secrets/actions"
+          echo "  2. Click 'New repository secret'"
+          echo "  3. Name: TF_VAR_apim_gateway_token"
+          echo "  4. Value: <paste the token from the command above>"
+          echo ""
+          echo "After adding the token, run the AWS deployment workflow:"
+          echo "  - Workflow: Terraform - AWS Deployment"
+          echo "  - Operation: apply"
+          echo "  - Environment: ${{ inputs.environment }}"
+          echo ""
+          echo "Get AKS credentials:"
+          echo "${{ env.AKS_CREDS_CMD }}"
+          echo ""
+          echo "============================================================"
+
+      - name: Terraform Destroy (Azure Resources)
+        id: destroy
+        if: inputs.operation == 'destroy'
+        run: |
+          echo "WARNING: Destroying Azure resources in ${{ inputs.environment }} environment"
+          echo "This will destroy:"
+          echo "  - Azure API Management instance"
+          echo "  - Azure Kubernetes Service cluster"
+          echo "  - Associated networking and storage resources"
+          echo ""
+
+          terraform destroy \
+            -target=module.azure_aks \
+            -target=module.azure_apim \
+            -var="apim_gateway_token=dummy-token-for-destroy" \
+            -auto-approve
+        env:
+          ARM_USE_OIDC: true
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          TF_VAR_apim_publisher_email: ${{ vars.APIM_PUBLISHER_EMAIL }}
+
+      - name: Destroy Complete
+        if: inputs.operation == 'destroy' && steps.destroy.outcome == 'success'
+        run: |
+          echo "============================================================"
+          echo "Azure Resources Destroyed"
+          echo "============================================================"
+          echo ""
+          echo "The following resources have been destroyed:"
+          echo "  - Azure API Management instance"
+          echo "  - Azure Kubernetes Service cluster"
+          echo ""
+          echo "Note: AWS resources (if deployed) are still running."
+          echo "Run the AWS destroy workflow separately if needed."
+          echo ""
+
+      - name: Workflow Summary
+        if: always()
+        run: |
+          echo "## Terraform Azure Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Operation**: ${{ inputs.operation }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Environment**: ${{ inputs.environment }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Status**: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Triggered by**: @${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Workflow Run**: [${{ github.run_id }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})" >> $GITHUB_STEP_SUMMARY

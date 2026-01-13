@@ -1,6 +1,16 @@
 
+# Anthropic Claude
+.claude/
+
 # JetBrains IDEs
 .idea/
+
+# Hashicorp Terraform
+.terraform/
+.terraform.*
+terraform.tfstate
+terraform.tfstate.*
+terraform.tfvars
 
 # macOS
 .DS_Store

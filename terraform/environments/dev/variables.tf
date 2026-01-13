@@ -35,11 +35,13 @@ variable "azure_location" {
 variable "apim_publisher_name" {
   description = "Publisher name for APIM"
   type        = string
+  default     = "wheeleruniverse"
 }
 
 variable "apim_publisher_email" {
-  description = "Publisher email for APIM"
+  description = "Publisher email for APIM (required - not hard-coded for privacy)"
   type        = string
+  # No default - must be provided via GitHub variable or tfvars
 }
 
 variable "apim_sku" {

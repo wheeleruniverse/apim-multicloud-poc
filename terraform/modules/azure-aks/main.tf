@@ -47,8 +47,8 @@ resource "azurerm_kubernetes_cluster" "main" {
     min_count           = var.enable_autoscaling ? var.min_node_count : null
     max_count           = var.enable_autoscaling ? var.max_node_count : null
     
-    # Use ephemeral OS disk for better performance
-    os_disk_type    = "Ephemeral"
+    # Use managed OS disk (ephemeral not supported on all VM types)
+    os_disk_type    = "Managed"
     os_disk_size_gb = 50
   }
 

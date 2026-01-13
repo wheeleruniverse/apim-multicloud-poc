@@ -80,57 +80,20 @@ This repository demonstrates Azure API Management (APIM) feasibility in multi-cl
 
 ## Quick Start
 
-### 1. Clone and Configure
+**For detailed step-by-step deployment instructions, authentication setup, and troubleshooting, see [docs/deployment-guide.md](docs/deployment-guide.md)**
 
-```bash
-git clone <repository-url>
-cd apim-multicloud-poc
+### High-Level Deployment Steps
 
-# Copy and edit environment variables
-cp terraform/environments/dev/terraform.tfvars.example terraform/environments/dev/terraform.tfvars
-```
+1. **Authenticate to cloud providers** (Azure CLI and AWS CLI)
+2. **Configure variables** - Copy and edit `terraform/environments/dev/terraform.tfvars.example`
+3. **Two-phase deployment**:
+   - Phase 1: Deploy Azure APIM and AKS
+   - Generate APIM gateway token
+   - Phase 2: Deploy AWS EKS with self-hosted gateway
+4. **Deploy APIs** to both clusters
+5. **Run tests** to verify multi-cloud setup
 
-### 2. Deploy Infrastructure
-
-```bash
-cd terraform/environments/dev
-
-# Initialize Terraform
-terraform init
-
-# Review the plan
-terraform plan
-
-# Apply the configuration
-terraform apply
-```
-
-### 3. Deploy APIs
-
-```bash
-# Build and push the API container
-cd api
-./build-and-push.sh
-
-# Deploy to AKS
-kubectl --context aks-apim-poc apply -f k8s/azure/
-
-# Deploy to EKS
-kubectl --context eks-apim-poc apply -f k8s/aws/
-```
-
-### 4. Run Tests
-
-```bash
-# Verify basic connectivity
-./scripts/tests/01-verify-connectivity.sh
-
-# Simulate Azure outage
-./scripts/tests/02-simulate-azure-outage.sh
-
-# Full resilience test suite
-./scripts/tests/03-full-resilience-test.sh
-```
+See the [Deployment Guide](docs/deployment-guide.md) for complete instructions.
 
 ## Self-Hosted Gateway Configuration
 

@@ -27,10 +27,6 @@ resource "azurerm_api_management" "main" {
 
   sku_name = var.apim_sku
 
-  identity {
-    type = "SystemAssigned"
-  }
-
   tags = var.tags
 }
 

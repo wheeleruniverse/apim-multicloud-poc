@@ -23,13 +23,13 @@ terraform {
     }
   }
 
-  # Uncomment and configure for remote state
-  # backend "azurerm" {
-  #   resource_group_name  = "terraform-state-rg"
-  #   storage_account_name = "tfstateaccount"
-  #   container_name       = "tfstate"
-  #   key                  = "apim-multicloud-poc.tfstate"
-  # }
+  # Remote state backend - Run scripts/bootstrap-azure.sh first to create these resources
+  backend "azurerm" {
+    resource_group_name  = "apim-multicloud-poc-dev-tfstate-rg"
+    storage_account_name = "steusapimmcpoctfstate"
+    container_name       = "tfstate"
+    key                  = "apim-multicloud-poc-dev.tfstate"
+  }
 }
 
 # Azure Provider Configuration
@@ -121,7 +121,7 @@ locals {
 module "azure_apim" {
   source = "../../modules/azure-apim"
 
-  resource_group_name = "${local.project_name}-${local.environment}-rg"
+  resource_group_name = "${local.project_name}-${local.environment}-apim-rg"
   location            = var.azure_location
   apim_name           = "${local.project_name}-${local.environment}-apim"
   publisher_name      = var.apim_publisher_name
@@ -144,8 +144,8 @@ module "azure_aks" {
     kubernetes = kubernetes.aks
   }
 
-  resource_group_name   = module.azure_apim.resource_group_name
-  create_resource_group = false
+  resource_group_name   = "${local.project_name}-${local.environment}-aks-rg"
+  create_resource_group = true
   location              = var.azure_location
 
   cluster_name = "${local.project_name}-${local.environment}-aks"
