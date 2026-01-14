@@ -33,7 +33,7 @@ jobs:
     runs-on: ubuntu-latest
 
     # Use environment protection for destroy operations
-    environment: ${{ inputs.operation == 'destroy' && format('{0}-azure-destroy-approval', inputs.environment) || format('{0}-azure', inputs.environment) }}
+    environment: ${{ inputs.operation == 'destroy' && format('{0}-destroy-approval', inputs.environment) || inputs.environment }}
 
     defaults:
       run:
