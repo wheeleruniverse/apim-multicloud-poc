@@ -60,6 +60,17 @@ echo -e "${GREEN}✓ Subscription ID: $SUBSCRIPTION_ID${NC}"
 echo -e "${GREEN}✓ Tenant ID: $TENANT_ID${NC}"
 echo ""
 
+# Confirmation prompt before creating resources
+echo -e "${YELLOW}⚠️  This script will create Azure resources in the subscription above.${NC}"
+echo -e "${YELLOW}Would you like to continue? (y/n)${NC}"
+read -r CONTINUE
+
+if [ "$CONTINUE" != "y" ] && [ "$CONTINUE" != "Y" ]; then
+    echo -e "${RED}Aborted by user.${NC}"
+    exit 1
+fi
+echo ""
+
 # Naming
 IDENTITY_NAME="${PROJECT_NAME}-${ENVIRONMENT}-github-actions"
 IDENTITY_RG="${PROJECT_NAME}-${ENVIRONMENT}-identity-rg"
@@ -287,9 +298,7 @@ if command -v gh &> /dev/null; then
         echo "1. Run the AWS setup script:"
         echo "   ./scripts/bootstrap/setup-aws-identity.sh $ENVIRONMENT"
         echo ""
-        echo "2. Push the GitHub Actions workflow files (if not already done)"
-        echo ""
-        echo "3. Run the Azure deployment workflow from GitHub Actions"
+        echo "2. Run the Azure deployment workflow from GitHub Actions"
         echo ""
     else
         # Manual configuration instructions
@@ -332,9 +341,7 @@ if command -v gh &> /dev/null; then
         echo "2. Run the AWS setup script:"
         echo "   ./scripts/bootstrap/setup-aws-identity.sh $ENVIRONMENT"
         echo ""
-        echo "3. Push GitHub Actions workflow files (if not already done)"
-        echo ""
-        echo "4. Run the Azure deployment workflow from GitHub Actions"
+        echo "3. Run the Azure deployment workflow from GitHub Actions"
         echo ""
     fi
 else
@@ -378,11 +385,9 @@ else
     echo "1. Add the secrets and variables above to your GitHub repository"
     echo ""
     echo "2. Run the AWS setup script:"
-    echo "   ./scripts/setup-aws-identity.sh $ENVIRONMENT"
+    echo "   ./scripts/bootstrap/setup-aws-identity.sh $ENVIRONMENT"
     echo ""
-    echo "3. Push GitHub Actions workflow files (if not already done)"
-    echo ""
-    echo "4. Run the Azure deployment workflow from GitHub Actions"
+    echo "3. Run the Azure deployment workflow from GitHub Actions"
     echo ""
 fi
 
