@@ -7,6 +7,10 @@ terraform {
       source  = "hashicorp/azurerm"
       version = "~> 4.57"
     }
+    kubernetes = {
+      source  = "hashicorp/kubernetes"
+      version = ">= 2.0"
+    }
   }
 }
 
@@ -40,12 +44,14 @@ resource "azurerm_kubernetes_cluster" "main" {
   dns_prefix          = var.dns_prefix
 
   default_node_pool {
-    name                = "default"
-    node_count          = var.node_count
-    vm_size             = var.vm_size
-    enable_auto_scaling = var.enable_autoscaling
-    min_count           = var.enable_autoscaling ? var.min_node_count : null
-    max_count           = var.enable_autoscaling ? var.max_node_count : null
+    name       = "default"
+    node_count = var.enable_autoscaling ? null : var.node_count
+    vm_size    = var.vm_size
+
+    # Autoscaling configuration (only when enabled)
+    auto_scaling_enabled = var.enable_autoscaling
+    min_count            = var.enable_autoscaling ? var.min_node_count : null
+    max_count            = var.enable_autoscaling ? var.max_node_count : null
 
     # Use managed OS disk (ephemeral not supported on all VM types)
     os_disk_type    = "Managed"
