@@ -58,5 +58,5 @@ output "aws_api_path" {
 # Output for generating self-hosted gateway token
 output "gateway_token_command" {
   description = "Azure CLI command to generate gateway token"
-  value       = "az apim gateway token create --gateway-id ${azurerm_api_management_gateway.aws_gateway.name} --resource-group ${azurerm_resource_group.apim.name} --service-name ${azurerm_api_management.main.name} --expiry '2025-12-31T23:59:59Z'"
+  value       = "az apim gateway token create --gateway-id ${azurerm_api_management_gateway.aws_gateway.name} --resource-group ${azurerm_resource_group.apim.name} --service-name ${azurerm_api_management.main.name} --expiry '2026-12-31T23:59:59Z'"
 }

@@ -105,7 +105,7 @@ jobs:
             echo "     --resource-group apim-multicloud-poc-${{ inputs.environment }}-apim-rg \\"
             echo "     --service-name apim-multicloud-poc-${{ inputs.environment }}-apim \\"
             echo "     --gateway-id aws-self-hosted-gateway \\"
-            echo "     --expiry 2025-12-31T23:59:59Z \\"
+            echo "     --expiry 2026-12-31T23:59:59Z \\"
             echo "     --query value -o tsv"
             echo ""
             echo "3. Add the token to GitHub Secrets:"

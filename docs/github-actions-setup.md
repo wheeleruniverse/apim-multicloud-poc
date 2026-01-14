@@ -283,7 +283,7 @@ az apim gateway token create \
   --resource-group apim-multicloud-poc-dev-apim-rg \
   --service-name apim-multicloud-poc-dev-apim \
   --gateway-id aws-self-hosted-gateway \
-  --expiry 2025-12-31T23:59:59Z \
+  --expiry 2026-12-31T23:59:59Z \
   --query value -o tsv
 ```
 
@@ -306,7 +306,7 @@ After Azure deployment completes, generate the APIM gateway token for AWS deploy
      --resource-group apim-multicloud-poc-dev-apim-rg \
      --service-name apim-multicloud-poc-dev-apim \
      --gateway-id aws-self-hosted-gateway \
-     --expiry 2025-12-31T23:59:59Z \
+     --expiry 2026-12-31T23:59:59Z \
      --query value -o tsv
    ```
 
@@ -322,7 +322,7 @@ After Azure deployment completes, generate the APIM gateway token for AWS deploy
      --resource-group apim-multicloud-poc-dev-apim-rg \
      --service-name apim-multicloud-poc-dev-apim \
      --gateway-id aws-self-hosted-gateway \
-     --expiry 2025-12-31T23:59:59Z \
+     --expiry 2026-12-31T23:59:59Z \
      --query value -o tsv | gh secret set TF_VAR_apim_gateway_token --repo wheeleruniverse/apim-multicloud-poc
 
    # You'll see:
@@ -621,7 +621,7 @@ This creates the storage account for Terraform state.
      --resource-group apim-multicloud-poc-dev-apim-rg \
      --service-name apim-multicloud-poc-dev-apim \
      --gateway-id aws-self-hosted-gateway \
-     --expiry 2025-12-31T23:59:59Z \
+     --expiry 2026-12-31T23:59:59Z \
      --query value -o tsv
    ```
 3. Add it to GitHub Secrets as `TF_VAR_apim_gateway_token`
@@ -679,7 +679,7 @@ This creates the storage account for Terraform state.
      --resource-group apim-multicloud-poc-dev-apim-rg \
      --service-name apim-multicloud-poc-dev-apim \
      --gateway-id aws-self-hosted-gateway \
-     --expiry 2025-12-31T23:59:59Z \
+     --expiry 2026-12-31T23:59:59Z \
      --query value -o tsv
    ```
 

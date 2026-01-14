@@ -103,7 +103,7 @@ az apim gateway token create \
   --gateway-id aws-self-hosted-gateway \
   --resource-group apim-multicloud-poc-dev-rg \
   --service-name apim-multicloud-poc-dev-apim \
-  --expiry "2025-12-31T23:59:59Z"
+  --expiry "2026-12-31T23:59:59Z"
 ```
 
 Update `terraform.tfvars` with the generated token:

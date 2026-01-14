@@ -23,7 +23,7 @@ apim_publisher_email = "your-email@example.com"
 #   --gateway-id aws-self-hosted-gateway \
 #   --resource-group apim-multicloud-poc-dev-apim-rg \
 #   --service-name apim-multicloud-poc-dev-apim \
-#   --expiry "2025-12-31T23:59:59Z" \
+#   --expiry "2026-12-31T23:59:59Z" \
 #   --query value -o tsv
 apim_gateway_token = "your-generated-token-here"
 
