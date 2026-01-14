@@ -30,7 +30,7 @@ variable "apim_sku" {
   description = "SKU for APIM (Developer, Basic, Standard, Premium)"
   type        = string
   default     = "Developer_1"
-  
+
   validation {
     condition     = can(regex("^(Developer|Basic|Standard|Premium)_[0-9]+$", var.apim_sku))
     error_message = "APIM SKU must be in format SKU_count (e.g., Developer_1, Premium_2)"

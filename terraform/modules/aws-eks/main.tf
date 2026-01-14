@@ -37,10 +37,10 @@ module "vpc" {
   private_subnets = var.private_subnets
   public_subnets  = var.public_subnets
 
-  enable_nat_gateway     = true
-  single_nat_gateway     = var.environment != "prod"
-  enable_dns_hostnames   = true
-  enable_dns_support     = true
+  enable_nat_gateway   = true
+  single_nat_gateway   = var.environment != "prod"
+  enable_dns_hostnames = true
+  enable_dns_support   = true
 
   public_subnet_tags = {
     "kubernetes.io/cluster/${var.cluster_name}" = "shared"
@@ -72,7 +72,7 @@ module "eks" {
     main = {
       name           = "main-node-group"
       instance_types = [var.instance_type]
-      
+
       min_size     = var.min_node_count
       max_size     = var.max_node_count
       desired_size = var.desired_node_count
@@ -137,7 +137,7 @@ resource "aws_ecr_lifecycle_policy" "api" {
 # Kubernetes namespace for Hello API
 resource "kubernetes_namespace" "hello_api" {
   depends_on = [module.eks]
-  
+
   metadata {
     name = var.api_namespace
     labels = {
@@ -150,7 +150,7 @@ resource "kubernetes_namespace" "hello_api" {
 # Kubernetes namespace for APIM Self-Hosted Gateway
 resource "kubernetes_namespace" "apim_gateway" {
   depends_on = [module.eks]
-  
+
   metadata {
     name = var.gateway_namespace
     labels = {
@@ -164,7 +164,7 @@ resource "kubernetes_namespace" "apim_gateway" {
 # Secret for APIM Gateway Token
 resource "kubernetes_secret" "gateway_token" {
   depends_on = [kubernetes_namespace.apim_gateway]
-  
+
   metadata {
     name      = "apim-gateway-token"
     namespace = var.gateway_namespace
@@ -180,7 +180,7 @@ resource "kubernetes_secret" "gateway_token" {
 # ConfigMap for API configuration
 resource "kubernetes_config_map" "api_config" {
   depends_on = [kubernetes_namespace.hello_api]
-  
+
   metadata {
     name      = "hello-api-config"
     namespace = var.api_namespace
@@ -196,7 +196,7 @@ resource "kubernetes_config_map" "api_config" {
 # ConfigMap for Self-Hosted Gateway configuration
 resource "kubernetes_config_map" "gateway_config" {
   depends_on = [kubernetes_namespace.apim_gateway]
-  
+
   metadata {
     name      = "apim-gateway-config"
     namespace = var.gateway_namespace
@@ -209,7 +209,7 @@ resource "kubernetes_config_map" "gateway_config" {
     "config.service.syncInterval"  = "60"
     "config.service.backupEnabled" = "true"
     "config.service.backupPath"    = "/apim/config-backup"
-    
+
     # Telemetry settings
     "telemetry.metrics.cloud" = "AWS"
     "telemetry.logs.std"      = "text"
@@ -219,7 +219,7 @@ resource "kubernetes_config_map" "gateway_config" {
 # PersistentVolumeClaim for configuration backup
 resource "kubernetes_persistent_volume_claim" "gateway_config_backup" {
   depends_on = [kubernetes_namespace.apim_gateway]
-  
+
   metadata {
     name      = "gateway-config-backup"
     namespace = var.gateway_namespace
@@ -244,7 +244,7 @@ resource "kubernetes_deployment" "apim_gateway" {
     kubernetes_config_map.gateway_config,
     kubernetes_persistent_volume_claim.gateway_config_backup
   ]
-  
+
   metadata {
     name      = "apim-self-hosted-gateway"
     namespace = var.gateway_namespace
@@ -391,7 +391,7 @@ resource "kubernetes_deployment" "apim_gateway" {
 # Service for APIM Self-Hosted Gateway
 resource "kubernetes_service" "apim_gateway" {
   depends_on = [kubernetes_deployment.apim_gateway]
-  
+
   metadata {
     name      = "apim-gateway"
     namespace = var.gateway_namespace
@@ -426,7 +426,7 @@ resource "kubernetes_service" "apim_gateway" {
 # Internal service for gateway (used by Hello API for local calls)
 resource "kubernetes_service" "apim_gateway_internal" {
   depends_on = [kubernetes_deployment.apim_gateway]
-  
+
   metadata {
     name      = "apim-gateway-internal"
     namespace = var.gateway_namespace

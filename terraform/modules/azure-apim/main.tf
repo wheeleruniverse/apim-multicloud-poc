@@ -36,8 +36,8 @@ resource "azurerm_api_management_gateway" "aws_gateway" {
   api_management_id = azurerm_api_management.main.id
   description       = "Self-hosted gateway deployed to AWS EKS"
   location_data {
-    name     = "AWS US East"
-    region   = "us-east-1"
+    name   = "AWS US East"
+    region = "us-east-1"
   }
 }
 
@@ -60,7 +60,7 @@ resource "azurerm_api_management_api" "azure_hello_api" {
 
   import {
     content_format = "openapi+json"
-    content_value  = jsonencode({
+    content_value = jsonencode({
       openapi = "3.0.1"
       info = {
         title   = "Azure Hello API"
@@ -79,8 +79,8 @@ resource "azurerm_api_management_api" "azure_hello_api" {
                     schema = {
                       type = "object"
                       properties = {
-                        message = { type = "string" }
-                        source  = { type = "string" }
+                        message   = { type = "string" }
+                        source    = { type = "string" }
                         timestamp = { type = "string" }
                       }
                     }
@@ -119,7 +119,7 @@ resource "azurerm_api_management_api" "aws_hello_api" {
 
   import {
     content_format = "openapi+json"
-    content_value  = jsonencode({
+    content_value = jsonencode({
       openapi = "3.0.1"
       info = {
         title   = "AWS Hello API"
@@ -138,8 +138,8 @@ resource "azurerm_api_management_api" "aws_hello_api" {
                     schema = {
                       type = "object"
                       properties = {
-                        message = { type = "string" }
-                        source  = { type = "string" }
+                        message   = { type = "string" }
+                        source    = { type = "string" }
                         timestamp = { type = "string" }
                       }
                     }

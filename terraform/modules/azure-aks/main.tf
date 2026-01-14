@@ -46,7 +46,7 @@ resource "azurerm_kubernetes_cluster" "main" {
     enable_auto_scaling = var.enable_autoscaling
     min_count           = var.enable_autoscaling ? var.min_node_count : null
     max_count           = var.enable_autoscaling ? var.max_node_count : null
-    
+
     # Use managed OS disk (ephemeral not supported on all VM types)
     os_disk_type    = "Managed"
     os_disk_size_gb = 50
@@ -95,7 +95,7 @@ resource "azurerm_role_assignment" "aks_acr_pull" {
 # Kubernetes namespace for the Hello API
 resource "kubernetes_namespace" "hello_api" {
   depends_on = [azurerm_kubernetes_cluster.main]
-  
+
   metadata {
     name = var.api_namespace
     labels = {
@@ -108,7 +108,7 @@ resource "kubernetes_namespace" "hello_api" {
 # ConfigMap for API configuration
 resource "kubernetes_config_map" "api_config" {
   depends_on = [kubernetes_namespace.hello_api]
-  
+
   metadata {
     name      = "hello-api-config"
     namespace = var.api_namespace
