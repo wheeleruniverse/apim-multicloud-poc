@@ -52,7 +52,7 @@ Before starting, ensure you have:
 - [x] Authenticated to Azure (`az login`)
 - [x] Authenticated to AWS (`aws configure` or `AWS_PROFILE` set)
 - [x] **Authenticated to GitHub** (`gh auth login`) - **Recommended**
-- [x] Terraform state backend created (run `./scripts/bootstrap-azure.sh` if not done)
+- [x] Terraform state backend created (run `./scripts/bootstrap/bootstrap-azure.sh` if not done)
 
 **Note:** GitHub CLI (`gh`) is highly recommended as it automates secret and variable configuration. Without it, you'll need to manually add secrets via the GitHub web UI.
 
@@ -69,7 +69,7 @@ This step creates an Azure Managed Identity with Federated Credentials for GitHu
 ```bash
 cd /path/to/apim-multicloud-poc
 chmod +x scripts/setup-azure-identity.sh
-./scripts/setup-azure-identity.sh dev
+./scripts/bootstrap/setup-azure-identity.sh dev
 ```
 
 **What this script does:**
@@ -149,9 +149,9 @@ This step creates an AWS IAM OIDC Identity Provider and IAM Role for GitHub Acti
 
 ```bash
 chmod +x scripts/setup-aws-identity.sh
-./scripts/setup-aws-identity.sh dev
+./scripts/bootstrap/setup-aws-identity.sh dev
 # Or with custom region:
-./scripts/setup-aws-identity.sh dev us-west-2
+./scripts/bootstrap/setup-aws-identity.sh dev us-west-2
 ```
 
 **What this script does:**
@@ -567,7 +567,7 @@ This creates the storage account for Terraform state.
 1. Verify secrets in GitHub match the output from `setup-azure-identity.sh`
 2. Re-run the Azure setup script:
    ```bash
-   ./scripts/setup-azure-identity.sh dev
+   ./scripts/bootstrap/setup-azure-identity.sh dev
    ```
 3. Check the managed identity exists:
    ```bash
@@ -592,7 +592,7 @@ This creates the storage account for Terraform state.
 1. Verify AWS_ROLE_ARN secret matches the role ARN from setup script
 2. Re-run the AWS setup script:
    ```bash
-   ./scripts/setup-aws-identity.sh dev
+   ./scripts/bootstrap/setup-aws-identity.sh dev
    ```
 3. Check the OIDC provider exists:
    ```bash
@@ -703,7 +703,7 @@ This creates the storage account for Terraform state.
 az role assignment list --assignee <client-id-from-setup>
 
 # If missing, re-run setup script
-./scripts/setup-azure-identity.sh dev
+./scripts/bootstrap/setup-azure-identity.sh dev
 ```
 
 **AWS permissions issue:**
@@ -715,7 +715,7 @@ aws iam list-attached-role-policies --role-name apim-multicloud-poc-dev-github-a
 aws iam list-role-policies --role-name apim-multicloud-poc-dev-github-actions
 
 # If missing, re-run setup script
-./scripts/setup-aws-identity.sh dev
+./scripts/bootstrap/setup-aws-identity.sh dev
 ```
 
 ---
@@ -863,16 +863,16 @@ To require manual approval before destroy operations:
 
 **Initial Setup (with gh CLI - Recommended):**
 - [ ] Install and authenticate: `gh auth login`
-- [ ] Run `./scripts/setup-azure-identity.sh dev` and answer 'y' to prompts
+- [ ] Run `./scripts/bootstrap/setup-azure-identity.sh dev` and answer 'y' to prompts
 - [ ] Enter APIM publisher name and email when prompted
-- [ ] Run `./scripts/setup-aws-identity.sh dev` and answer 'y' to prompt
+- [ ] Run `./scripts/bootstrap/setup-aws-identity.sh dev` and answer 'y' to prompt
 - [ ] Done! All secrets and variables configured automatically
 
 **Initial Setup (without gh CLI - Manual):**
-- [ ] Run `./scripts/setup-azure-identity.sh dev`
+- [ ] Run `./scripts/bootstrap/setup-azure-identity.sh dev`
 - [ ] Manually add 3 Azure secrets to GitHub
 - [ ] Manually add 2 variables to GitHub (APIM_PUBLISHER_NAME, APIM_PUBLISHER_EMAIL)
-- [ ] Run `./scripts/setup-aws-identity.sh dev`
+- [ ] Run `./scripts/bootstrap/setup-aws-identity.sh dev`
 - [ ] Manually add AWS_ROLE_ARN secret to GitHub
 
 **Deployment:**

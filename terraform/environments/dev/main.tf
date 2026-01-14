@@ -23,7 +23,7 @@ terraform {
     }
   }
 
-  # Remote state backend - Run scripts/bootstrap-azure.sh first to create these resources
+  # Remote state backend - Run scripts/bootstrap/bootstrap-azure.sh first to create these resources
   backend "azurerm" {
     resource_group_name  = "apim-multicloud-poc-dev-tfstate-rg"
     storage_account_name = "steusapimmcpoctfstate"

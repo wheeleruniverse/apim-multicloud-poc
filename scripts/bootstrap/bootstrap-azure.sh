@@ -1,16 +1,22 @@
 #!/bin/bash
+################################################################################
 # Bootstrap script for Azure APIM Multi-Cloud POC
+################################################################################
 # This script creates the necessary Azure resources before running Terraform
+#
+# Usage:
+#   ./bootstrap-azure.sh [ENVIRONMENT] [LOCATION]
+#
+# Example:
+#   ./bootstrap-azure.sh dev eastus
+################################################################################
 
 set -e  # Exit on error
 
-# =============================================================================
-# Configuration - Update these values as needed
-# =============================================================================
-
+# Configuration - Hard-coded for this specific project
 PROJECT_NAME="apim-multicloud-poc"
-ENVIRONMENT="dev"
-LOCATION="eastus"
+ENVIRONMENT="${1:-dev}"
+LOCATION="${2:-eastus}"
 
 # Azure naming convention: st + region + project + env + tfstate
 # Max 24 chars for storage account name (lowercase letters and numbers only)
@@ -46,6 +52,20 @@ warn() {
 error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
+
+# =============================================================================
+# Display Configuration
+# =============================================================================
+
+echo -e "${BLUE}============================================================${NC}"
+echo -e "${BLUE}Azure Terraform State Backend Bootstrap${NC}"
+echo -e "${BLUE}============================================================${NC}"
+echo ""
+echo "Project: $PROJECT_NAME"
+echo "Environment: $ENVIRONMENT"
+echo "Location: $LOCATION"
+echo "Storage Account: $STORAGE_ACCOUNT_NAME"
+echo ""
 
 # =============================================================================
 # Preflight checks

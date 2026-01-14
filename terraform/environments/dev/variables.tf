@@ -53,7 +53,7 @@ variable "apim_sku" {
 variable "aks_node_count" {
   description = "Number of AKS nodes"
   type        = number
-  default     = 2
+  default     = 1
 }
 
 variable "aks_vm_size" {
@@ -117,13 +117,13 @@ variable "eks_max_nodes" {
 variable "eks_desired_nodes" {
   description = "Desired number of EKS worker nodes"
   type        = number
-  default     = 2
+  default     = 1
 }
 
 variable "gateway_replicas" {
   description = "Number of self-hosted gateway replicas"
   type        = number
-  default     = 2
+  default     = 1
 }
 
 variable "apim_gateway_token" {
