@@ -5,7 +5,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~> 3.80"
+      version = "~> 4.57"
     }
   }
 }
@@ -53,7 +53,6 @@ resource "azurerm_api_management_api" "azure_hello_api" {
   resource_group_name   = azurerm_resource_group.apim.name
   api_management_name   = azurerm_api_management.main.name
   revision              = "1"
-  display_name          = "Azure Hello API"
   path                  = "azure-api"
   protocols             = ["https"]
   service_url           = var.aks_backend_url
@@ -113,7 +112,6 @@ resource "azurerm_api_management_api" "aws_hello_api" {
   resource_group_name   = azurerm_resource_group.apim.name
   api_management_name   = azurerm_api_management.main.name
   revision              = "1"
-  display_name          = "AWS Hello API"
   path                  = "aws-api"
   protocols             = ["https"]
   service_url           = var.eks_backend_url

@@ -7,7 +7,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~> 3.80"
+      version = "~> 4.57"
     }
     aws = {
       source  = "hashicorp/aws"
@@ -129,9 +129,12 @@ module "azure_apim" {
   apim_sku            = var.apim_sku
   environment         = local.environment
 
-  # Backend URLs - AKS service will be created after cluster
-  aks_backend_url = "http://hello-api.${var.api_namespace}.svc.cluster.local"
-  eks_backend_url = "http://hello-api.${var.api_namespace}.svc.cluster.local"
+  # Backend URLs - Use placeholder URLs initially
+  # After deploying the APIs to clusters, update these to the actual service URLs
+  # Azure: http://hello-api.hello-api.svc.cluster.local
+  # AWS: http://hello-api.hello-api.svc.cluster.local
+  aks_backend_url = "http://backend-placeholder.example.com/azure"
+  eks_backend_url = "http://backend-placeholder.example.com/aws"
 
   tags = local.azure_tags
 }
