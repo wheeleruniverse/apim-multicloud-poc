@@ -32,8 +32,7 @@ jobs:
     name: 'Terraform Azure - ${{ inputs.operation }}'
     runs-on: ubuntu-latest
 
-    # Use environment protection for destroy operations
-    environment: ${{ inputs.operation == 'destroy' && format('{0}-destroy-approval', inputs.environment) || inputs.environment }}
+    environment: ${{ inputs.environment }}
 
     defaults:
       run:
