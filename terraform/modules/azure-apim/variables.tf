@@ -8,7 +8,6 @@ variable "resource_group_name" {
 variable "location" {
   description = "Azure region for resources"
   type        = string
-  default     = "centralus"
 }
 
 variable "apim_name" {

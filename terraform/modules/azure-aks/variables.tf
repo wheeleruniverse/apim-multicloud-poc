@@ -14,7 +14,6 @@ variable "create_resource_group" {
 variable "location" {
   description = "Azure region for resources"
   type        = string
-  default     = "eastus"
 }
 
 variable "cluster_name" {
