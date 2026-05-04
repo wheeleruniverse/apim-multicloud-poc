@@ -2,6 +2,10 @@
 
 This repository demonstrates Azure API Management (APIM) feasibility in multi-cloud scenarios using the APIM Self-Hosted Gateway deployed to AWS EKS alongside a traditional Azure AKS deployment.
 
+## ⚠️ Experimental & Not Verified ⚠️
+
+**_I had issues deploying the self-hosted gateway feature using Azure's APIM product offering early 2026. Due to lack of Microsoft support I abandoned the effort. The code you see here may work, or may be completely broken. This is not actively maintained at the moment. I may revisit in a while to see if Microsoft's products have improved. Cheers!_**
+
 ## Architecture Overview
 
 ```
